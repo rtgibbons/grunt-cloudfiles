@@ -1,0 +1,21 @@
+{
+  "name": "grunt-cloudfiles",
+  "version": "0.0.1",
+  "description": "Grunt task to work with Rackspace Cloudfiles",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rtgibbons/grunt-cloudfiles.git"
+  },
+  "main": "grunt.js",
+  "keywords": [
+    "gruntplugin",
+    "rackspace",
+    "cloudfiles"
+  ],
+  "author": "Ryan Gibbons <rtgibbons23@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cloudfiles": "~0.3.4",
+    "underscore.deferred": "~0.2.0"
+  }
+}
