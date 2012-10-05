@@ -14,7 +14,7 @@ Cloudfiles is Rackspace's cloud object storage. It's simliar to Amazon S3 and is
 
 ## Changelog
 
-* Initial auth, create a container, and adding files
+* Auth and adding files
 
 ## Future Work
 
