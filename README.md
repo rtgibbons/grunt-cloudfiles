@@ -4,7 +4,6 @@
 Cloudfiles is Rackspace's cloud object storage. It's simliar to Amazon S3 and is based on [grunt-s3][grunts3]. This uses the [node-cloudfiles][nodecloudfiles] by [Nodejitsu][nodejitsu]. This is all designed to work with Rackspace Cloudfiles and hasn't been tested on Open Stack.
 
 ## Installation
-
 1. npm install grunt-cloudfiles ***OR*** add `grunt-cloudfiles` to your `package.json
 1. Add `grunt.registerNpmTasks('grunt-cloudfiles');` to `grunt.js`
 
