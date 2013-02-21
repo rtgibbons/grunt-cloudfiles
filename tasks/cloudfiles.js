@@ -40,13 +40,15 @@ module.exports = function(grunt) {
         grunt.log.subhead('Uploading into ' + upload.container);
         var files = grunt.file.expand(upload.src);
 
+        if (upload.dest === undefined) { upload.dest = '' }
+
         files.forEach(function(file) {
           if (grunt.file.isFile(file)) {
             var ufile = file;
             if(upload.stripcomponents !== undefined) {
               ufile = stripComponents(ufile, upload.stripcomponents);
             }
-            cfActivity.push(cf_addFile(upload.container, file, ufile));
+            cfActivity.push(cf_addFile(upload.container, file, upload.dest + ufile));
           }
         })
       });
