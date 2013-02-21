@@ -1,8 +1,8 @@
 module.exports = function(grunt) {
-  var cf = require('cloudfiles'),
+  var cf = require('pkgcloud'),
     path = require('path'),
     util = require('util'),
-    _ = grunt.utils._;
+    _ = grunt.util._;
 
   _.mixin(require('underscore.deferred'));
 
@@ -25,29 +25,30 @@ module.exports = function(grunt) {
       errors = 0;
 
     config = this.data;
-    cfAuth = {
-      'auth': {
-        'username': config.user,
-        'apiKey': config.key
-      }
-    };
 
-    client = cf.createClient(cfAuth);
+    client = cf.storage.createClient({
+      'provider': 'rackspace',
+      'username': config.user,
+      'apiKey': config.key
+    })
 
     var cfActivity = [];
 
-    _.when(grunt.helper('cf.init')).done(function(init) {
-      grunt.log.debug(init + "\n  " + util.inspect(cfConfig));
+   // _.when(cf_init()).done(function(init) {
+      // grunt.log.debug(init + "\n  " + util.inspect(cfConfig));
       config.upload.forEach(function(upload) {
         grunt.log.subhead('Uploading into ' + upload.container);
-        var files = grunt.file.expandFiles(upload.src);
+        var files = grunt.file.expand(upload.src);
 
         files.forEach(function(file) {
-          var ufile = file;
-          if(upload.stripcomponents !== undefined) {
-            ufile = stripComponents(ufile, upload.stripcomponents);
+          if (grunt.file.isFile(file)) {
+            var ufile = file;
+            if(upload.stripcomponents !== undefined) {
+              ufile = stripComponents(ufile, upload.stripcomponents);
+            }
+            console.log(file);
+            cfActivity.push(cf_addFile(upload.container, file, ufile));
           }
-          cfActivity.push(grunt.helper('cf.addFile', upload.container, file, ufile))
         })
       });
 
@@ -68,14 +69,14 @@ module.exports = function(grunt) {
           }
         });
       });
-    }).fail(function(err) {
-      grunt.log.error('Error with intiallization of Cloudfiles ::\n\t' + err);
-    });
+    //}).fail(function(err) {
+    //  grunt.log.error('Error with intiallization of Cloudfiles ::\n\t' + err);
+    //});
 
 
   });
 
-  grunt.registerHelper('cf.init', function() {
+  function cf_init() {
     var dfd = _.Deferred();
     var async
 
@@ -90,13 +91,14 @@ module.exports = function(grunt) {
     });
 
     return dfd;
-  });
+  }
 
-  grunt.registerHelper('cf.addFile', function(container, src, dest) {
+  function cf_addFile(container, src, dest) {
     grunt.log.debug('Starting an upload');
     var dfd = _.Deferred();
 
-    client.addFile(container, {
+    client.upload({
+      'container': container,
       'remote': dest,
       'local': src
     }, function(err, uploaded, res) {
@@ -108,5 +110,5 @@ module.exports = function(grunt) {
     });
 
     return dfd;
-  });
+  }
 }

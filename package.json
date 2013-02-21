@@ -15,7 +15,7 @@
   "author": "Ryan Gibbons <rtgibbons23@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "cloudfiles": "~0.3.4",
-    "underscore.deferred": "~0.2.0"
+    "underscore.deferred": "~0.2.0",
+    "pkgcloud": "~0.6.7-1"
   }
 }
