@@ -46,7 +46,6 @@ module.exports = function(grunt) {
             if(upload.stripcomponents !== undefined) {
               ufile = stripComponents(ufile, upload.stripcomponents);
             }
-            console.log(file);
             cfActivity.push(cf_addFile(upload.container, file, ufile));
           }
         })
