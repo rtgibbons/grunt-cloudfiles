@@ -1,6 +1,6 @@
 {
   "name": "grunt-cloudfiles",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Grunt task to work with Rackspace Cloudfiles",
   "repository": {
     "type": "git",
@@ -14,8 +14,17 @@
   ],
   "author": "Ryan Gibbons <rtgibbons23@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
   "dependencies": {
     "underscore.deferred": "~0.2.0",
     "pkgcloud": "~0.6.7-1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.0"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.0"
   }
 }
