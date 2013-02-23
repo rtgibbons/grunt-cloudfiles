@@ -13,6 +13,17 @@ Cloudfiles is Rackspace's cloud object storage. It's simliar to Amazon S3 and is
 
 ## Changelog
 
+### 0.0.3
+
+* Allow for destination folder in containeru
+
+### 0.0.2
+
+* Migreate to pkgcloud cloud
+* Support grunt >= 0.4.0
+
+### 0.0.1
+
 * Auth and adding files
 
 ## Future Work
