@@ -4,7 +4,7 @@
 [Cloud Files](http://www.rackspace.com/cloud/files/) is Rackspace's cloud object storage. It's simliar to Amazon S3.
 
 This task is based on [grunt-s3](https://github.com/pifantastic/grunt-s3) by Aaron Forsander, 
-and uses the [node-cloudfiles](https://github.com/nodejitsu/node-cloudfiles) client by Nodejitsu. 
+and uses the [pkgcloud](https://github.com/nodejitsu/pkgcloud) client by Nodejitsu. 
 
 This is all designed to work with Rackspace Cloud Files, and hasn't been tested on OpenStack Storage.
 
