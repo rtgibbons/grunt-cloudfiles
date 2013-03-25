@@ -26,11 +26,18 @@ module.exports = function(grunt) {
 
     config = this.data;
 
-    client = cf.storage.createClient({
+    var clientConfig = {
       'provider': 'rackspace',
       'username': config.user,
       'apiKey': config.key
-    })
+    };
+
+    // Optional config parameter authUrl - Used to overwrite the authUrl as defined by pkgcloud
+    if(config.hasOwnProperty("authUrl")){
+      clientConfig.authUrl = config.authUrl;
+    }
+
+    client = cf.storage.createClient(clientConfig);
 
     var cfActivity = [];
 
