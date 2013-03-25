@@ -10,7 +10,7 @@ This is all designed to work with Rackspace Cloud Files, and hasn't been tested 
 
 ## Installation
 1. `npm install grunt-cloudfiles --save-dev` (or manually add `grunt-cloudfiles` to your `package.json`).
-1. Add `grunt.registerNpmTasks('grunt-cloudfiles');` to `Gruntfile.js`
+1. Add `grunt.loadNpmTasks('grunt-cloudfiles');` to `Gruntfile.js`
 
 ## Configuration
 
