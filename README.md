@@ -40,7 +40,23 @@ In this example we only have `prod`, but you could have `staging`, etc.
 Remember that your Rackspace **API key** is private. If you are commiting your Gruntfile 
 to a public repository, you probably want to store it in a separate local_config.json file.
 
+For Rackspace UK users an additional configuration parameter `authUrl` is required to use the correct CDN url for UK accounts.
+
+```javascript
+cloudfiles: {
+  prod: {
+    ...
+    'authUrl': 'lon.identity.api.rackspacecloud.com',
+    ...
+  }
+}
+```
+
 ## Changelog
+
+### 0.0.4
+
+* Added support for Rackspace UK cloudfile accounts
 
 ### 0.0.3
 
