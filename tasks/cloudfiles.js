@@ -33,8 +33,8 @@ module.exports = function(grunt) {
     };
 
     // Optional config parameter authUrl - Used to overwrite the authUrl as defined by pkgcloud
-    if(this.data.hasOwnProperty("authUrl")){
-      clientConfig.authUrl = this.data.authUrl;
+    if(config.hasOwnProperty("authUrl")){
+      clientConfig.authUrl = config.authUrl;
     }
 
     client = cf.storage.createClient(clientConfig);
