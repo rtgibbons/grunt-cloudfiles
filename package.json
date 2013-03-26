@@ -13,6 +13,20 @@
     "cloudfiles"
   ],
   "author": "Ryan Gibbons <rtgibbons23@gmail.com>",
+  "contributors": [
+    {
+      "name": "Thomas Welton",
+      "email": "thomaswelton@me.com"
+    },
+    {
+      "name": "Justin H. Johnson",
+      "email": "justin.hills.johnson@gmail.com"
+    },
+    {
+      "name": "Manuel Razzari",
+      "email": "manuel@ultimorender.com.ar"
+    }
+  ],
   "license": "MIT",
   "engines": {
     "node": ">= 0.8.0"
