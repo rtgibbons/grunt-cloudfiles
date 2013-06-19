@@ -1,6 +1,6 @@
 {
   "name": "grunt-cloudfiles",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Grunt task to work with Rackspace Cloudfiles",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "underscore.deferred": "~0.2.0",
-    "pkgcloud": "~0.6.7-1"
+    "async": "~0.2.9",
+    "pkgcloud": "~0.8.2"
   },
   "devDependencies": {
     "grunt": "~0.4.0"
