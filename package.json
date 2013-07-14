@@ -1,6 +1,6 @@
 {
   "name": "grunt-cloudfiles",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Grunt task to work with Rackspace Cloudfiles",
   "repository": {
     "type": "git",
@@ -25,6 +25,10 @@
     {
       "name": "Manuel Razzari",
       "email": "manuel@ultimorender.com.ar"
+    },
+    {
+      "name": "Ken Perkins",
+      "email": "ken.perkins@rackspace.com"
     }
   ],
   "license": "MIT",
@@ -33,7 +37,7 @@
   },
   "dependencies": {
     "async": "~0.2.9",
-    "pkgcloud": "~0.8.2"
+    "pkgcloud": "~0.8.3"
   },
   "devDependencies": {
     "grunt": "~0.4.0"
