@@ -1,30 +1,17 @@
 module.exports = function(grunt) {
-  var cf = require('pkgcloud'),
-    path = require('path'),
-    util = require('util'),
-    _ = grunt.util._;
+  var pkgcloud = require('pkgcloud'),
+      path = require('path'),
+      util = require('util'),
+      async = require('async'),
+      crypto = require('crypto'),
+      fs = require('fs'),
+      _ = grunt.util._;
 
-  _.mixin(require('underscore.deferred'));
-
-  var cfAuth = {},
-    client, cf_container_name, config, cfConfig;
-
-  function stripComponents(path, num, sep) {
-    if(sep === undefined) sep = '/';
-    var aString = path.split(sep)
-    if(aString.length <= num) {
-      return aString[aString.length - 1];
-    } else {
-      aString.splice(0, num);
-      return aString.join(sep);
-    }
-  }
+  var client;
 
   grunt.registerMultiTask('cloudfiles', 'Move stuff to the cloud', function() {
     var done = this.async(),
-      errors = 0;
-
-    config = this.data;
+        config = this.data;
 
     var clientConfig = {
       'provider': 'rackspace',
@@ -37,86 +24,174 @@ module.exports = function(grunt) {
       clientConfig.authUrl = config.authUrl;
     }
 
-    client = cf.storage.createClient(clientConfig);
+    // Optionally set the region (i.e. DFW/ORD/SYD...)
+    if (config.hasOwnProperty("region")) {
+      clientConfig.region = config.region;
+    }
 
-    var cfActivity = [];
+    client = pkgcloud.storage.createClient(clientConfig);
 
-   // _.when(cf_init()).done(function(init) {
-      // grunt.log.debug(init + "\n  " + util.inspect(cfConfig));
-      config.upload.forEach(function(upload) {
-        grunt.log.subhead('Uploading into ' + upload.container);
-        var files = grunt.file.expand(upload.src);
+    async.forEach(config.upload, function(upload, next) {
+      grunt.log.subhead('Uploading into ' + upload.container);
 
-        if (upload.dest === undefined) { upload.dest = '' }
-
-        files.forEach(function(file) {
-          if (grunt.file.isFile(file)) {
-            var ufile = file;
-            if(upload.stripcomponents !== undefined) {
-              ufile = stripComponents(ufile, upload.stripcomponents);
+      client.getContainer(upload.container, function(err, container) {
+        // client error
+        if (err && !(err.statusCode === 404)) {
+          return next(err);
+        }
+        // 404, so create it
+        else if (err && err.statusCode === 404) {
+          grunt.log.write('Creating CDN Enabled Container: ' + upload.container);
+          createCdnEnabledContainer(upload.container, function(err, container) {
+            if (err) {
+              return next(err);
             }
-            cfActivity.push(cf_addFile(upload.container, file, upload.dest + ufile));
-          }
-        })
+
+            syncFiles(upload, container, next);
+          });
+        }
+        // created, but not cdn enabled
+        else if (container && !container.cdnEnabled) {
+          grunt.log.write('CDN Enabling Container: ' + upload.container);
+          container.enableCdn(function(err, container) {
+            if (err) {
+              return next(err);
+            }
+
+            syncFiles(upload, container, next);
+          });
+        }
+        // good to go, just sync the files
+        else {
+          syncFiles(upload, container, next);
+        }
       });
-
-      var total = cfActivity.length;
-      var errors = 0;
-
-      cfActivity.forEach(function(activity) {
-        activity.done(function(msg) {});
-        activity.fail(function(msg) {
-          grunt.log.error(msg);
-          ++errors;
-        });
-        activity.always(function() {
-          // If this was the last transfer to complete, we're all done.
-          if(--total === 0) {
-            grunt.log.write('Finished uploading ' + cfActivity.length + ' item(s)')
-            done(!errors);
-          }
-        });
-      });
-    //}).fail(function(err) {
-    //  grunt.log.error('Error with intiallization of Cloudfiles ::\n\t' + err);
-    //});
-
-
+    }, function(err) {
+      if (err) {
+        grunt.log.error(err);
+      }
+      done(err);
+    });
   });
 
-  function cf_init() {
-    var dfd = _.Deferred();
-    var async
+  function syncFiles(upload, container, callback) {
+    grunt.log.writeln('Syncing files to container: ' + container.name);
 
-    grunt.log.debug('Authenticating on Cloudfiles');
-    client.setAuth(function(err, res, config) {
-      if(err) {
-        dfd.reject(err);
-      } else {
-        cfConfig = config;
-        dfd.resolve('Authentication Complete');
+    var files = grunt.file.expand(upload.src);
+
+    if (upload.dest === undefined) { upload.dest = '' }
+
+    async.forEachLimit(files, 10, function(file, next) {
+      if (grunt.file.isFile(file)) {
+        syncFile(file, container, upload.dest, upload.stripcomponents, next);
       }
+      else {
+        next();
+      }
+    }, function(err) {
+      callback(err);
     });
-
-    return dfd;
   }
 
-  function cf_addFile(container, src, dest) {
-    grunt.log.debug('Starting an upload');
-    var dfd = _.Deferred();
+  function syncFile(fileName, container, dest, strip, callback) {
 
-    client.upload({
-      'container': container,
-      'remote': dest,
-      'local': src
-    }, function(err, uploaded, res) {
-      if(err) {
-        dfd.reject(err);
-      } else {
-        dfd.resolve(uploaded);
+    var ufile = fileName;
+    if (strip !== undefined) {
+      ufile = stripComponents(ufile, strip);
+    }
+
+    hashFile(fileName, function (err, hash) {
+      if (err) {
+        return next(err);
       }
+
+      client.getFile(container, ufile, function (err, file) {
+        if (err && !(err.statusCode === 404)) {
+          callback(err);
+        }
+        else if (err && err.statusCode === 404) {
+          grunt.log.writeln('Uploading ' + fileName + ' to ' + container.name + ' (NEW)');
+          client.upload({
+            container: container,
+            remote: dest + ufile,
+            local: fileName
+          }, function (err) {
+            callback(err);
+          });
+        }
+        else if (file && file.etag !== hash) {
+          grunt.log.writeln('Updating ' + fileName + ' to ' + container.name + ' (MD5 Diff)');
+          client.upload({
+            container: container,
+            remote: dest + ufile,
+            local: fileName
+          }, function (err) {
+            callback(err);
+          });
+        }
+        else {
+          grunt.log.writeln('Skipping ' + fileName + ' in ' + container.name + ' (MD5 Match)');
+          callback();
+        }
+      })
+    });
+  }
+
+  function createCdnEnabledContainer(containerName, callback) {
+    client.createContainer(containerName, function(err, container) {
+      if (err) {
+        return callback(err);
+      }
+
+      container.enableCdn(function(err, container) {
+        if (err) {
+          return callback(err);
+        }
+
+        callback(err, container);
+      });
+    });
+  }
+
+  function stripComponents(path, num, sep) {
+    if (sep === undefined) sep = '/';
+    var aString = path.split(sep)
+    if (aString.length <= num) {
+      return aString[aString.length - 1];
+    } else {
+      aString.splice(0, num);
+      return aString.join(sep);
+    }
+  }
+
+  // Used to MD5 a file, useful when checking against already
+  // uploaded assets
+  function hashFile(filename, callback) {
+
+    var calledBack = false,
+        md5sum = crypto.createHash('md5'),
+        stream = fs.ReadStream(filename);
+
+    stream.on('data', function (data) {
+      md5sum.update(data);
     });
 
-    return dfd;
+    stream.on('end', function () {
+      var hash = md5sum.digest('hex');
+      callback(null, hash);
+    });
+
+    stream.on('error', function(err) {
+      handleResponse(err);
+    });
+
+    function handleResponse(err, hash) {
+      if (calledBack) {
+        return;
+      }
+
+      calledBack = true;
+      callback(err, hash);
+    }
   }
 }
