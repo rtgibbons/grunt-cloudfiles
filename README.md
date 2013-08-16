@@ -20,11 +20,11 @@ cloudfiles: {
   prod: {
     'user': 'your Rackspace username',
     'key': 'your Rackspace API key',
+    'region': 'DFW',
     'upload': [{
       'container': 'name of your Cloud Files container',
       'src': 'source/static/**/*',
       'dest': 'some/folder/',
-      'region': 'DFW',
       'stripcomponents': 1
     }]
   }
