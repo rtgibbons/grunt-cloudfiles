@@ -11,7 +11,8 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('cloudfiles', 'Move stuff to the cloud', function() {
     var done = this.async(),
-        config = this.data;
+        config = this.data,
+        enableCdn = config.enableCdn !== false;
 
     var clientConfig = {
       'provider': 'rackspace',
@@ -42,7 +43,7 @@ module.exports = function(grunt) {
         // 404, so create it
         else if (err && err.statusCode === 404) {
           grunt.log.write('Creating CDN Enabled Container: ' + upload.container);
-          createCdnEnabledContainer(upload.container, function(err, container) {
+          createContainer(upload.container, enableCdn, function(err, container) {
             if (err) {
               return next(err);
             }
@@ -51,7 +52,7 @@ module.exports = function(grunt) {
           });
         }
         // created, but not cdn enabled
-        else if (container && !container.cdnEnabled) {
+        else if (container && !container.cdnEnabled && enableCdn) {
           grunt.log.write('CDN Enabling Container: ' + upload.container);
           container.enableCdn(function(err, container) {
             if (err) {
@@ -137,19 +138,24 @@ module.exports = function(grunt) {
     });
   }
 
-  function createCdnEnabledContainer(containerName, callback) {
+  function createContainer(containerName, enableCdn, callback) {
     client.createContainer(containerName, function(err, container) {
       if (err) {
         return callback(err);
       }
 
-      container.enableCdn(function(err, container) {
-        if (err) {
-          return callback(err);
-        }
+      if (enableCdn) {
+        container.enableCdn(function(err, container) {
+          if (err) {
+            return callback(err);
+          }
 
+          callback(err, container);
+        });
+      }
+      else {
         callback(err, container);
-      });
+      }
     });
   }
 
