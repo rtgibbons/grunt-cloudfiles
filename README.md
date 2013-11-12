@@ -47,7 +47,8 @@ For Rackspace UK users an additional configuration parameter `authUrl` is requir
 cloudfiles: {
   prod: {
     ...
-    'authUrl': 'lon.identity.api.rackspacecloud.com',
+    'region': 'LON',
+    'authUrl': 'https://lon.identity.api.rackspacecloud.com',
     ...
   }
 }
