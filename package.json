@@ -37,12 +37,12 @@
   },
   "dependencies": {
     "async": "~0.2.9",
-    "pkgcloud": "~0.8.3"
+    "pkgcloud": "~0.8.14"
   },
   "devDependencies": {
-    "grunt": "~0.4.0"
+    "grunt": "~0.4.1"
   },
   "peerDependencies": {
-    "grunt": "~0.4.0"
+    "grunt": "~0.4.1"
   }
 }
