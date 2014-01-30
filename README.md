@@ -26,9 +26,9 @@ cloudfiles: {
       'src': 'source/static/**/*',
       'dest': 'some/folder/',
       'stripcomponents': 1,
-      purge: {
-        emails: ['your@email.com'],
-        files: ['index.html']
+      'purge': {
+        'emails': ['your@email.com'],
+        'files': ['index.html']
       }
     }]
   }
