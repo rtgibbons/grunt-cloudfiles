@@ -63,7 +63,18 @@ module.exports = function(grunt) {
         }
         // good to go, just sync the files
         else {
-          syncFiles(upload, container, next);
+          syncFiles(upload, container, function purgeFiles() {
+            if (!upload.purge) {
+                return next();
+            }
+            grunt.log.subhead('Purging files from ' + upload.container);
+            async.forEachLimit(upload.purge.files, 10, function (fileName, n) {
+                grunt.log.writeln('Purging ' + fileName);
+                client.purgeFileFromCdn(container, fileName, upload.purge.emails || [], n)
+            }, function () {
+                next();
+            });
+          });
         }
       });
     }, function(err) {
