@@ -25,7 +25,11 @@ cloudfiles: {
       'container': 'name of your Cloud Files container',
       'src': 'source/static/**/*',
       'dest': 'some/folder/',
-      'stripcomponents': 1
+      'stripcomponents': 1,
+      'purge': {
+        'emails': ['your@email.com'],
+        'files': ['index.html']
+      }
     }]
   }
 }
@@ -55,6 +59,9 @@ cloudfiles: {
 ```
 
 ## Changelog
+
+### 0.1.1
+* added an option to purge files after the upload
 
 ### 0.1.0
 

@@ -1,6 +1,6 @@
 {
   "name": "grunt-cloudfiles",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Grunt task to work with Rackspace Cloudfiles",
   "repository": {
     "type": "git",
@@ -29,6 +29,10 @@
     {
       "name": "Ken Perkins",
       "email": "ken.perkins@rackspace.com"
+    },
+    {
+      "name": "Kobi Meirson",
+      "email": "kobi@right.co.il"
     }
   ],
   "license": "MIT",
