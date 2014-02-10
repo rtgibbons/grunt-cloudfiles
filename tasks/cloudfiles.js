@@ -83,7 +83,7 @@ module.exports = function(grunt) {
 
     async.forEachLimit(files, 10, function(file, next) {
       if (grunt.file.isFile(file)) {
-        syncFile(file, container, upload.dest, upload.stripcomponents, next);
+        syncFile(file, container, upload.dest, upload.stripcomponents, upload.headers, next);
       }
       else {
         next();
@@ -93,9 +93,11 @@ module.exports = function(grunt) {
     });
   }
 
-  function syncFile(fileName, container, dest, strip, callback) {
+  function syncFile(fileName, container, dest, strip, headers, callback) {
 
     var ufile = fileName;
+    headers = headers || {};
+
     if (strip !== undefined) {
       ufile = stripComponents(ufile, strip);
     }
@@ -114,7 +116,8 @@ module.exports = function(grunt) {
           client.upload({
             container: container,
             remote: dest + ufile,
-            local: fileName
+            local: fileName,
+            headers: headers
           }, function (err) {
             callback(err);
           });
@@ -124,7 +127,8 @@ module.exports = function(grunt) {
           client.upload({
             container: container,
             remote: dest + ufile,
-            local: fileName
+            local: fileName,
+            headers: headers
           }, function (err) {
             callback(err);
           });
