@@ -11,7 +11,8 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('cloudfiles', 'Move stuff to the cloud', function() {
     var done = this.async(),
-        config = this.data;
+        config = this.data,
+        enableCdn = config.enableCdn !== false;
 
     var clientConfig = {
       'provider': 'rackspace',
@@ -42,7 +43,7 @@ module.exports = function(grunt) {
         // 404, so create it
         else if (err && err.statusCode === 404) {
           grunt.log.write('Creating CDN Enabled Container: ' + upload.container);
-          createCdnEnabledContainer(upload.container, function(err, container) {
+          createContainer(upload.container, enableCdn, function(err, container) {
             if (err) {
               return next(err);
             }
@@ -51,7 +52,7 @@ module.exports = function(grunt) {
           });
         }
         // created, but not cdn enabled
-        else if (container && !container.cdnEnabled) {
+        else if (container && !container.cdnEnabled && enableCdn) {
           grunt.log.write('CDN Enabling Container: ' + upload.container);
           container.enableCdn(function(err, container) {
             if (err) {
@@ -63,7 +64,13 @@ module.exports = function(grunt) {
         }
         // good to go, just sync the files
         else {
-          syncFiles(upload, container, next);
+          syncFiles(upload, container, function () {
+            if (upload.hasOwnProperty("purge")) {
+                purgeFiles(upload, container, next);
+            } else {
+                next();
+            }
+          });
         }
       });
     }, function(err) {
@@ -74,6 +81,19 @@ module.exports = function(grunt) {
     });
   });
 
+  function purgeFiles(upload, container, callback) {
+      grunt.log.subhead('Purging files from ' + upload.container);
+      async.forEachLimit(upload.purge.files, 10, function (fileName, next) {
+          grunt.log.writeln('Purging ' + fileName);
+          client.purgeFileFromCdn(container, fileName, upload.purge.emails || [], function (err) {
+              if (err) {
+                  grunt.log.error(err);
+              }
+              next();
+          })
+      }, callback);
+  }
+
   function syncFiles(upload, container, callback) {
     grunt.log.writeln('Syncing files to container: ' + container.name);
 
@@ -83,7 +103,7 @@ module.exports = function(grunt) {
 
     async.forEachLimit(files, 10, function(file, next) {
       if (grunt.file.isFile(file)) {
-        syncFile(file, container, upload.dest, upload.stripcomponents, next);
+        syncFile(file, container, upload.dest, upload.stripcomponents, upload.headers, next);
       }
       else {
         next();
@@ -93,9 +113,11 @@ module.exports = function(grunt) {
     });
   }
 
-  function syncFile(fileName, container, dest, strip, callback) {
+  function syncFile(fileName, container, dest, strip, headers, callback) {
 
     var ufile = fileName;
+    headers = headers || {};
+
     if (strip !== undefined) {
       ufile = stripComponents(ufile, strip);
     }
@@ -114,7 +136,8 @@ module.exports = function(grunt) {
           client.upload({
             container: container,
             remote: dest + ufile,
-            local: fileName
+            local: fileName,
+            headers: headers
           }, function (err) {
             callback(err);
           });
@@ -124,7 +147,8 @@ module.exports = function(grunt) {
           client.upload({
             container: container,
             remote: dest + ufile,
-            local: fileName
+            local: fileName,
+            headers: headers
           }, function (err) {
             callback(err);
           });
@@ -137,19 +161,24 @@ module.exports = function(grunt) {
     });
   }
 
-  function createCdnEnabledContainer(containerName, callback) {
+  function createContainer(containerName, enableCdn, callback) {
     client.createContainer(containerName, function(err, container) {
       if (err) {
         return callback(err);
       }
 
-      container.enableCdn(function(err, container) {
-        if (err) {
-          return callback(err);
-        }
+      if (enableCdn) {
+        container.enableCdn(function(err, container) {
+          if (err) {
+            return callback(err);
+          }
 
+          callback(err, container);
+        });
+      }
+      else {
         callback(err, container);
-      });
+      }
     });
   }
 
