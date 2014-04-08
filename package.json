@@ -1,6 +1,6 @@
 {
   "name": "grunt-cloudfiles",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "Grunt task to work with Rackspace Cloudfiles",
   "repository": {
     "type": "git",
