@@ -64,11 +64,11 @@ module.exports = function(grunt) {
         }
         // good to go, just sync the files
         else {
-          syncFiles(upload, container, function () {
-            if (upload.hasOwnProperty("purge")) {
+          syncFiles(upload, container, function (err) {
+            if (!err && upload.hasOwnProperty("purge")) {
                 purgeFiles(upload, container, next);
             } else {
-                next();
+                next(err);
             }
           });
         }
