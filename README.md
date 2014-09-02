@@ -1,5 +1,11 @@
 # Grunt Cloud Files
 
+## Call For Help
+
+I wrote this to solve a particular problem we were facing on a project. I kept it up for a while, but I'm not suing the plugin anymore, and I no longer have the time to keep up with it.
+
+If you are interested in helping, please reach out to me and we can talk through the code and things, and some 'next steps'. If all goes good I can add you to the Authors list on NPM for publish rights.
+
 ## About
 [Cloud Files](http://www.rackspace.com/cloud/files/) is Rackspace's cloud object storage. It's simliar to Amazon S3.
 
